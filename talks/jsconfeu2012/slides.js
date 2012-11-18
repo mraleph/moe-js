@@ -11,7 +11,7 @@
 */
 
 // var PERMANENT_URL_PREFIX = 'http://localhost:8000/';
-var PERMANENT_URL_PREFIX = 'http://moe-js.googlecode.com/git-history/HEAD/talks/jsconfeu2012';
+var PERMANENT_URL_PREFIX = 'http://moe-js.googlecode.com/git-history/HEAD/talks/jsconfeu2012/';
 
 var SLIDE_CLASSES = ['far-past', 'past', 'current', 'next', 'far-next'];
 
