@@ -10,8 +10,8 @@
   URL: http://code.google.com/p/html5slides/
 */
 
-var PERMANENT_URL_PREFIX = 'http://localhost:8000/';
-// var PERMANENT_URL_PREFIX = 'http://s3.mrale.ph/nodecamp.eu/';
+// var PERMANENT_URL_PREFIX = 'http://localhost:8000/';
+var PERMANENT_URL_PREFIX = 'http://moe-js.googlecode.com/git-history/HEAD/talks/jsconfeu2012';
 
 var SLIDE_CLASSES = ['far-past', 'past', 'current', 'next', 'far-next'];
 
