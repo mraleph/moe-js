@@ -1,0 +1,1 @@
+This toy tracing compiler is based on ideas from [LuaJIT2](http://luajit.org) tracing compiler developed by Mike Pall.
