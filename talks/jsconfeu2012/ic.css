@@ -1,0 +1,54 @@
+span.function span {
+  position: absolute;
+  width: 16pt;
+  height: 16pt;
+  /* border-radius: 10px; */
+  background: rgba(173, 216, 230, 0.5);
+  content: "";
+  overflow: visible;
+  cursor: pointer;
+
+  -webkit-transition: all 100ms ease-in;
+  -o-transition: all 0.5s ease-in;
+  -moz-transition: all 100ms ease-in;
+  transition: all 100ms ease-in;
+}
+
+span.function span.optimized {
+  background: rgba(255, 165, 0, 0.5) !important;
+}
+
+span.function:hover span {
+  background: lightblue !important;
+}
+
+span.function:hover span.optimized {
+  background: rgba(255, 165, 0, 1.0) !important;
+}
+
+span.ic span {
+  position: absolute;
+  top: -13pt;
+  left: -5pt;
+  width: 16pt;
+  height: 16pt;
+  border-radius: 10px;
+  background: grey;
+  opacity: 0.5;
+  content: "";
+  overflow: visible;
+  cursor: pointer;
+}
+
+span.ic.ic-state-MONOMORPHIC span {
+  background: green !important;
+}
+
+span.ic.ic-state-MEGAMORPHIC span {
+  background: #c00 !important;
+}
+
+.popover pre {
+  font-size: 12pt !important;
+  line-height: 12pt !important;
+}

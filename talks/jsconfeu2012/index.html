@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+
+<!--
+  Google HTML5 slide template
+
+  Authors: Luke Mahé (code)
+           Marcin Wichary (code and design)
+
+           Dominic Mazzoni (browser compatibility)
+           Charles Chen (ChromeVox support)
+
+  URL: http://code.google.com/p/html5slides/
+-->
+
+<html>
+  <head>
+    <title>exploring js vm in js</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Oranienbaum' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Just+Another+Hand' rel='stylesheet' type='text/css'>
+
+    <meta charset='utf-8'>
+    <script src="jquery-1.8.2.min.js"></script>
+
+    <link rel="stylesheet" href="codemirror/lib/codemirror.css">
+    <script src="codemirror/lib/codemirror.js"></script>
+    <script src="codemirror/mode/javascript/javascript.js"></script>
+
+    <script src='slides.js'></script>
+
+    <link rel="stylesheet" href="ic.css">
+    <link href="bootstrap/css/bootstrap.css" rel="stylesheet">
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+
+    <script>
+      // This code parses only in a special build of Chromium.
+      // There are shims provided in the respective files.
+      // Command line for special build:
+      // Chromium.app/Contents/MacOS/Chromium --user-data-dir=/tmp/PROFILE --js-flags="--allow-natives-syntax --nocleanup_code_caches_at_gc --harmony-collections" --no-sandbox --renderer-cmd-prefix='xterm -title renderer -fa Monaco -fs 30 -e gdb --command=run.gdb --args'
+      function $Scripts() { return %DebugGetLoadedScripts(); }
+      function $Disassemble(f) { return %DebugDisassembleFunction(f); }
+      function $Heap() { return %GetHeapView(); }
+      function $Page(addr) { return %GetHeapView(addr); }
+    </script>
+  </head>
+
+  <style>
+    /* Your individual styles here, or just use inline styles if that’s
+       what you want. */
+
+
+  </style>
+
+  <body style='display: none'>
+
+    <section class='slides layout-regular template-default'>
+
+      <!-- Your slides (<article>s) go here. Delete or comment out the
+           slides below. -->
+
+      <article>
+        <center>
+        <h1 style="font-family: 'Oranienbaum';">
+          <span style="color: #C00;">exploring</span> js vm in js
+       </h1>
+        <p>
+          Vyacheslav Egorov
+         <br/><div style="font-size: 20pt; margin-top: 20px;">
+           <a href="http://twitter.com/mraleph">@mraleph</a></div>
+       </p>
+        </center>
+
+
+        <div style="position: absolute; bottom: 1pt; right: 2pt; padding-right: 2px; font-size: 20pt; line-height: 22pt;">navigate with cursor keys &larr;&rarr; or space bar</div>
+
+        <div style="position: absolute; bottom: 1pt; left: 2pt; padding-right: 2px; font-size: 20pt; line-height: 22pt;">jsconf.eu 2012</div>
+      </article>
+
+<!--
+      <article>
+        <img src="V8.svg" style="width: 300px; height: 300px"/>
+        <img src="Dart_Logo.svg"/>
+      </article>
+-->
+
+      <article>
+        <div style="vertical-align: middle; display: table-cell; width: 100%; height: 600px;">
+          <div style="font-size: 10em; color: #990033; ">TOYS</div>
+        </div>
+      </article>
+
+      <article class="bigger">
+        <h3>Performance in 6 lines</h3>
+        <ul class="build" style="line-height: 46px;">
+          <li>Inline Caches</li>
+          <li>Inline Caches</li>
+          <li>Inline Caches</li>
+          <li>Inline Caches</li>
+          <li>Inline Caches</li>
+          <li>Speculative Optimizations</li>
+        </ul>
+      </article>
+
+<!--
+      <article>
+        <div style="vertical-align: middle; display: table-cell; width: 778px; height: 600px; text-align: center;">
+          <div style="font-size: 7em; color: black; text-align: center; ">PIXIE<br/>DUST</div>
+        </div>
+      </article>
+-->
+
+<!--
+      <article class="bigger">
+        <div style="vertical-align: middle; display: table-cell; width: 778px; height: 600px; text-align: center;">
+          <div style="font-size: 3em; color: black; text-align: center; ">
+            когда в Риме, поступай как Римляне
+          </div>
+        </div>
+      </article>
+-->
+
+      <article class="bigger">
+        <div style="vertical-align: middle; display: table-cell; width: 778px; height: 600px; text-align: center;">
+          <div style="font-size: 3em; color: black; text-align: center; ">
+            si fueris Romae, Romano vivito more
+          </div>
+        </div>
+      </article>
+
+      <article class="bigger">
+        <div style="vertical-align: middle; display: table-cell; width: 778px; height: 600px; text-align: center;">
+          <div style="font-size: 2em; color: black; text-align: center; ">
+            when working on XYZ VM, try doing everything in XYZ.
+          </div>
+        </div>
+      </article>
+
+      <article class="bigger">
+        <h3>Plan A</h3>
+      </article>
+
+      <article class="bigger">
+        <h3>Plan A</h3>
+        <img src="plan-a-5.png"/>
+      </article>
+
+      <article class="bigger">
+        <h3>Plan A</h3>
+        <img src="plan-a-4.png"/>
+      </article>
+
+      <article class="bigger">
+        <h3>Plan A</h3>
+        <img src="plan-a-3.png"/>
+      </article>
+
+      <article class="bigger">
+        <h3>Plan A</h3>
+        <img src="plan-a-2.png"/>
+      </article>
+
+      <article class="bigger">
+        <h3>Plan A</h3>
+        <img src="plan-a-1.png"/>
+      </article>
+
+      <article class="bigger">
+        <h3>Plan A</h3>
+        <img src="plan-a-0.png"/>
+      </article>
+
+      <article class="bigger">
+        <h3>Plan A</h3>
+        <img src="plan-a--1.png"/>
+      </article>
+
+      <article class="bigger">
+        <h3>Plan B</h3>
+        <br/><br/>
+        <img src="plan-b.png"/>
+      </article>
+
+      <article class="bigger" id="ics-slide">
+        <select id="urls" style="width: 670px;"></select>&nbsp;<button type="button" class="btn" data-toggle="button" id="show-ics">Show ICs</button>
+        <div id="codemirror"></div>
+      </article>
+
+      <article class="bigger">
+        <h3>Plan B</h3>
+        <pre>
+var ics =
+    $Scripts()[0].inline_caches;
+while (i &lt; ics.length) {
+  switch (ics[i++]) {
+    case kIC: // ...
+    case kPosition: // ...
+    case kFunction: // ...
+  }
+}
+        </pre>
+      </article>
+
+
+      <article class="bigger">
+        <h3>Plan B</h3>
+        <pre style="font-size: 10pt;">
+MaybeObject* Accessors::ScriptGetInlineCaches(Object* object, void*) {
+  Isolate* isolate = JSValue::cast(object)-&gt;GetIsolate();
+  Zone zone(isolate);
+  ZoneScope zone_scope(&amp;zone, DELETE_ON_EXIT);
+
+  HandleScope handle_scope(isolate);
+  Handle&lt;Script&gt; script(Script::cast(JSValue::cast(object)-&gt;value()));
+
+  isolate-&gt;heap()-&gt;CollectAllGarbage(Heap::kMakeHeapIterableMask, "ScriptGetInlineCaches");
+
+  ZoneList&lt;Object*&gt;* ic_data_list = NULL;
+  {
+    AssertNoAllocation no_allocation;
+    HeapIterator iterator(HeapIterator::kFilterUnreachable);
+
+    CodeSet set(&amp;zone);
+    for (HeapObject* obj = iterator.next();
+         obj != NULL;
+         obj = iterator.next()) {
+      if (obj-&gt;IsJSFunction() &amp;&amp; JSFunction::cast(obj)-&gt;shared()-&gt;script() == *script) {
+        JSFunction* func = JSFunction::cast(obj);
+        SharedFunctionInfo* shared = func-&gt;shared();
+        set.Add(shared-&gt;code(), shared);
+        set.Add(func-&gt;code(), func);
+      }
+    }
+
+    ic_data_list = set.FindICs();
+  }
+
+  Handle&lt;FixedArray&gt; ic_data = isolate-&gt;factory()-&gt;NewFixedArray(ic_data_list-&gt;length());
+  for (int i = 0; i &lt; ic_data_list-&gt;length(); i++) {
+    ic_data-&gt;set(i, ic_data_list-&gt;at(i));
+  }
+
+  return *isolate-&gt;factory()-&gt;NewJSArrayWithElements(ic_data);
+}
+        </pre>
+      </article>
+
+      <article>
+        <div style="vertical-align: middle; display: table-cell; width: 100%; height: 600px;">
+          <span style="font-size: 7em;">C++ :-(</span>
+        </div>
+      </article>
+
+      <article class="bigger">
+        <h3>Plan Z</h3>
+        <pre>
+  // Valid JavaScript!
+  var Page = struct({
+    next_chunk: addr,
+    prev_chunk: addr,
+    size: u32,
+    flags: i32,
+    area_start: addr,
+    area_end: addr
+  });
+        </pre>
+      </article>
+
+      <article class="bigger">
+        <h3>Plan Z</h3>
+        <pre>
+  var HeapObject = struct({
+    // tagged pointer to Map
+    map: tptr('Map')
+  });
+
+  var Map = struct(HeapObject, {
+    instance_size: u32,
+    instance_type: u8
+  });
+        </pre>
+      </article>
+
+      <article class="bigger">
+        <h3>Plan Z</h3>
+        <pre>
+  var Code = struct(HeapObject, {
+    instruction_size: i32,
+    reloc_info: tptr(HeapObject),
+    handlers: tptr(HeapObject),
+    deopt_data: tptr(HeapObject),
+    type_feedback: tptr(HeapObject),
+    gc_metadata: tptr(HeapObject),
+    ic_age: i32,
+    flags: i32,
+    kind_flags1: u32,
+    kind_flags2: u32
+  });
+        </pre>
+      </article>
+
+      <article class="bigger">
+        <h3>Plan Z: Typed arrays FTW!</h3>
+        <pre>
+// raw view into V8 heap!
+var page = $Heap().code_space[0];
+for (var it = ObjectIterator(
+                  page.area_start,
+                  page.area_end);
+     !it.done();
+     it.next()) {
+  // raw view into an object.
+  var obj = it.object;
+  console.log(obj.Size());
+}
+        </pre>
+      </article>
+
+      <article class="bigger" id="plan-z-slide">
+        <h3>Plan Z: WebGL Typed Arrays</h3>
+        <div id="first-page"></div>
+        <pre id="sloppy-disasm" style="font-family: 'Just Another Hand', monospace; margin-top: -80px;">
+        </pre>
+        <div id="sloppy-disasm-disclaimer" style="position: absolute; width: 460px; left: 400px; top: 350px; font-family: 'Just Another Hand'; font-size: 50px; color: grey;" class="ss1">Note: disassembly is done in pure JavaScript with <a href="https://github.com/evilpie/disasmx86.js" style="color: lightblue;">disasmx86.js</a>. Library is not complete so disassembly sometimes does not make sense.</div>
+      </article>
+
+      <article class="bigger">
+        <h3>Plan Z: I have the power</h3>
+        <pre style="margin-bottom: 50px; font-size: 32px;">
+var p = Page($Heap().code_space[0]);
+var start = p.area_start &amp; (kPageSize - 1);
+var end = p.area_end &amp; (kPageSize - 1);
+var m = "\xCCHello JSConfEU";
+for (var i = start; i &lt; end; i++) {
+  p.memory[i] = m.charCodeAt(i % m.length);
+}</pre>
+        <center><button type="button" class="btn btn-danger" id="rampage-heap" style="-webkit-transform: scale(3);">Explode!</button></center><br/>
+        <center><div id="rampage-heap-shim">Special build of Chromium would crash</div></center>
+      </article>
+
+      <article class="bigger">
+        <img src="sigtrap.png">
+      </article>
+
+      <article class="bigger">
+        <h3>So why are we still using C++?</h3>
+      </article>
+
+      <article class="bigger">
+        <h3>So why are we still using C++?</h3>
+        <div style="vertical-align: middle; display: table-cell; width: 100%; height: 600px; text-align: center;">
+          <div style="font-size: 4em;"><b>no</b> idea.</div>
+        </div>
+      </article>
+
+<!--
+      <article class="bigger">
+        <div style="text-align: center;">
+        <div style="vertical-align: middle; display: table-cell; height: 600px; text-align: center;">
+          <div style="font-size: 4em; align: center;" id="clock">Thank you!</div>
+          <script type="text/javascript">
+            setInterval(function () {
+              var d = new Date();
+              $("#clock").text(d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds());
+            }, 1000);
+          </script>
+        </div>
+      </div>
+      </article>
+-->
+
+      <article class="bigger">
+        <h3>Plan <b>m&#246;.js</b></h3>
+        <ul style="line-height: 48px;">
+          <li>Not a VM</li>
+          <li>Exploration of VM's facets</li>
+          <li>Pure JavaScript</li>
+        </ul>
+      </article>
+
+      <article class="bigger" id="moe-slide">
+        <div id="moe-btns"></div>
+        <div id="moe-bytecode">
+function main
+  function reduce
+    loadconst r3, 0
+   loop:
+    loop 4
+    load r4, r0, "n"
+    lessthan r3, r4
+    jmp exit
+    move r4, r1
+    move r5, r2
+    load r6, r0, r3
+    call r4, 2
+    move r2, r4
+    add r3, r3, 1
+    jmp loop
+   exit:
+    ret r2
+
+  function dot
+    load r2, r0, "x"
+    load r3, r1, "x"
+    mul r2, r2, r3
+    load r3, r0, "y"
+    load r4, r1, "y"
+    mul r3, r3, r4
+    add r2, r2, r3
+    ret r2
+
+  function Point
+    newtable r2
+    store r2, "x", r0
+    store r2, "y", r1
+    ret r2
+
+  function MakeArrayOfPoints
+    newtable r1
+    loadconst r2, -1
+    loadconst r3, 0
+   loop:
+    loop 4
+    lessthan r3, r0
+    jmp exit
+    mul r2, r2, -1
+    loadglobal r4, "MakePoint"
+    mul r5, r2, r3
+    unm r6, r3
+    mul r6, r2, r6
+    call r4, 2
+    store r1, r3, r4
+    add r3, r3, 1
+    jmp loop
+   exit:
+    store r1, "n", r0
+    ret r1
+
+  function Benchmark
+     function anon
+      loadglobal r2, "dot"
+      move r3, r1
+      move r4, r1
+      call r2, 2
+      add r2, r0, r2
+      ret r2
+
+    loadglobal r0, "reduce"
+    loadglobal r1, "points"
+    newclosure r2, @anon
+    loadconst r3, 0
+    call r0, 3
+    ret
+
+  newclosure r0, @reduce
+  storeglobal "reduce", r0
+  newclosure r0, @dot
+  storeglobal "dot", r0
+  newclosure r0, @MakePoint
+  storeglobal "MakePoint", r0
+  newclosure r0, @MakeArrayOfPoints
+  storeglobal "MakeArrayOfPoints", r0
+  storeglobal "N", 1000
+  loadglobal r0, "MakeArrayOfPoints"
+  loadglobal r1, "N"
+  call r0, 1
+  storeglobal "points", r0
+  newclosure r0, @Benchmark
+  ret r0
+        </div>
+        <div style="font-family: 'Just Another Hand'; font-size: 50pt; text-align: center; color: #c00;" id="moe-score"></div>
+      </article>
+
+      <article class="bigger">
+        <h3>Too many indirections!</h3>
+        <img src="indirections.png">
+      </article>
+
+      <article>
+        <div style="vertical-align: middle; display: table-cell; width: 100%; height: 600px; text-align: center;">
+          <div style="font-size: 3em;"><span style="font-weight: bold;">lim</span><div style="display: inline; font-size: 40pt; position: relative; top: +1.0em; left: -2.5em;">t&rarr;&infin;</div><div style="display: inline; position: relative; left: -0.8em;">m&#246;.js&nbsp;=&nbsp;VM</div></div>
+        </div>
+      </article>
+
+      <article class="bigger">
+        <h3>Plan &Omega;: can you spot a bug?</h3>
+        <pre class="lang-cpp" style="font-size: 12pt;">
+Handle&lt;Code&gt; KeyedLoadStubCompiler::CompileLoadField(Handle&lt;String&gt; name,
+                                                     Handle&lt;JSObject&gt; receiver,
+                                                     Handle&lt;JSObject&gt; holder,
+                                                     int index) {
+  // ----------- S t a t e -------------
+  //  -- ecx    : key
+  //  -- edx    : receiver
+  //  -- esp[0] : return address
+  // -----------------------------------
+  Label miss;
+
+  Counters* counters = isolate()-&gt;counters();
+  __ IncrementCounter(counters-&gt;keyed_load_field(), 1);
+
+  // Check that the name has not changed.
+  __ cmp(ecx, Immediate(name));
+  __ j(not_equal, &amp;miss);
+
+  GenerateLoadField(receiver, holder, edx, ebx, ecx, edi, index, name, &amp;miss);
+
+  __ bind(&amp;miss);
+  __ DecrementCounter(counters-&gt;keyed_load_field(), 1);
+  GenerateLoadMiss(masm(), Code::KEYED_LOAD_IC);
+
+  // Return the generated code.
+  return GetCode(FIELD, name);
+}
+        </pre>
+      </article>
+
+      <article class="bigger">
+        <h3>Plan &Omega;: what about <em>now</em>?</h3>
+        <pre class="lang-cpp" style="font-size: 30pt;">
+  GenerateLoadField(receiver,
+                    holder,
+                    edx,
+                    ebx,
+                    ecx,
+                    edi,
+                    index,
+                    name,
+                    &amp;miss);
+        </pre>
+      </article>
+
+      <article class="bigger">
+        <h3>Plan &Omega;: yes, here it is</h3>
+        <pre class="lang-cpp" style="font-size: 30pt;">
+  GenerateLoadField(receiver,
+                    holder,
+                    edx,
+                    ebx,
+                    <span style="color: #C00; font-weight: bold; font-size: 35pt;">ecx</span>,
+                    edi,
+                    index,
+                    name,
+                    &amp;miss);
+        </pre>
+      </article>
+
+      <article class="bigger">
+        <h3>Plan &Omega;: fixed!</h3>
+        <pre class="lang-cpp" style="font-size: 30pt;">
+  GenerateLoadField(receiver,
+                    holder,
+                    edx,
+                    ebx,
+                    <span style="color: green; font-weight: bold; font-size: 35pt;">eax</span>,
+                    edi,
+                    index,
+                    name,
+                    &amp;miss);
+        </pre>
+      </article>
+
+      <article class="bigger">
+        <h3>Plan &Omega;</h3>
+        <pre class="lang-js" style="font-size: 22pt;">
+function CompileLoadField(name, receiver_obj,
+                          holder_obj, index) {
+  return specialize(function (key, receiver) {
+    "STUB (ecx, edx)";
+    counters.keyed_load_field().inc();
+    if (key === name) {
+      return LoadFieldFastPath(
+        receiver, index, receiver_obj, holder_obj);
+    }
+    counters.keyed_load_field().dec();
+    return KeyedLoad_Miss(key, receiver);
+  });
+}
+        </pre>
+      </article>
+
+      <article class="bigger">
+        <h3>Plan &Omega;</h3>
+        <ul style="line-height: 46px;" class="build">
+          <li>JavaScript with <em>annotations</em>;</li>
+          <li>through <em>partial evaluator</em>;</li>
+          <li>to a LIR;</li>
+          <li>Can be applied to current VMs;</li>
+          <li>&hellip; does not help to understand VMs</li>
+        </ul>
+      </article>
+
+      <article>
+        <div style="vertical-align: middle; display: table-cell; width: 100%; height: 600px; text-align: center;">
+          <div style="font-size: 4em;">Thank you!</div>
+          <div style="font-size: 2em;">Q&amp;A</div>
+        </div>
+      </article>
+
+
+    </section>
+
+<!--      <script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-6701581-4']);
+  _gaq.push(['_setDomainName', '.mrale.ph']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+-->
+    <script src="https://raw.github.com/Benvie/harmony-collections/master/harmony-collections.min.js"></script>
+    <script src="https://raw.github.com/evilpie/disasmx86.js/master/disasmx86.js"></script>
+
+    <script src="ics.js"></script>
+    <script src="raphael-min.js"></script>
+    <script src="pages.js"></script>
+    <script src="moe.js.js"></script>
+  </body>
+</html>
