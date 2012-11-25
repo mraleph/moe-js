@@ -478,7 +478,12 @@ void main() {
                ..href = html.query("#canvas").toDataURL("image/png")
                ..attributes['download'] = html.query("#name").value;
     html.document.body.nodes.add(a);
-    a.click();
+    html.window.setTimeout(() => a.remove(), 1000);
+    try {
+      a.click();
+    } catch (e) {
+      a.$dom_dispatchEvent(new html.Event("click"));
+    }
   });
 
   js.scoped(() {
