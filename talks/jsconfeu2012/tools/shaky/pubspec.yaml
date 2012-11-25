@@ -1,0 +1,5 @@
+name:  shaky
+description:  Shaky Diagramming
+dependencies:
+  js: any
+#  unittest: { sdk: unittest }
