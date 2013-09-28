@@ -30,7 +30,7 @@ class ShakyCanvas {
 
   final random = new math.Random();
   final html.CanvasRenderingContext2D ctx;
-  
+
   var x0, y0;
 
   moveTo(x0, y0) {
@@ -128,21 +128,21 @@ class ShakyCanvas {
     lineTo(x1, y1);
     ctx.stroke();
   }
-  
+
   // Forward some methods to rendering context.
-  // Ideally we would just use 
+  // Ideally we would just use
   //
   //   noSuchMethod(mirror) => mirror.invokeOn(mirror);
   //
-  // But that does not work on VM and does not entirely 
+  // But that does not work on VM and does not entirely
   // work on dart2js.
   // So for now we will just use manual forwarding.
   beginPath() => ctx.beginPath();
   stroke() => ctx.stroke();
-  
+
   set strokeStyle(val) { ctx.strokeStyle = val; }
   set fillStyle(val) { ctx.fillStyle = val; }
-  
+
   fillText(text, x0, y0) => ctx.fillText(text, x0, y0);
 }
 
@@ -150,13 +150,13 @@ class ShakyCanvas {
 // Code below converts ASCII art into Line and Text elements.
 //
 
-// Size in pixels for a sigle character cell of ASCII art. 
+// Size in pixels for a sigle character cell of ASCII art.
 final CELL_SIZE = 15;
 
 X(x) => x * CELL_SIZE + (CELL_SIZE / 2);
 Y(y) => y * CELL_SIZE + (CELL_SIZE / 2);
 
-// Auxiliary Point class used during parsing. 
+// Auxiliary Point class used during parsing.
 // Unfortunately Dart does not support structural classes or
 // local classes so I had to polute library namespace with it.
 class Point {
@@ -183,7 +183,7 @@ class Line {
     _ending(ctx, start, X(x1), Y(y1), X(x0), Y(y0));
     _ending(ctx, end, X(x0), Y(y0), X(x1), Y(y1));
   }
-  
+
   // Draw given type of ending on the (x1, y1).
   _ending(canvas, type, x0, y0, x1, y1) {
     switch (type) {
@@ -201,9 +201,9 @@ class Line {
 // Text annotation at (x0, y0) with the given color.
 class Text {
   Text(this.x0, this.y0, this.text, this.color);
-  
-  var x0, y0, text, color; 
-  
+
+  var x0, y0, text, color;
+
   draw(ctx) {
     ctx.fillStyle = color;
     ctx.fillText(text, X(x0), Y(y0));
@@ -216,10 +216,10 @@ parseASCIIArt(string) {
   var lines = string.split('\n');
 
   var height = lines.length;
-  var width  = lines.reduce(0, (w, line) => math.max(w, line.length));
+  var width  = lines.fold(0, (w, line) => math.max(w, line.length));
 
   var data = new List(height);  // Matrix containing ASCII art.
-  
+
   // Get a character from the array or null if we are out of bounds.
   // Useful in places where we inspect character's neighbors and peek
   // out of bounds for boundary characters.
@@ -241,7 +241,7 @@ parseASCIIArt(string) {
   // Returns true iff the character can be part of the line.
   isPartOfLine(x, y) {
     var c = at(y, x);
-    return c === "|" || c === "-" || c === "+" || c === "~" || c === "!";
+    return c == "|" || c == "-" || c == "+" || c == "~" || c == "!";
   }
 
   // If character represents a color modifier returns CSS color.
@@ -254,14 +254,14 @@ parseASCIIArt(string) {
   // Returns true iff characters is line ending decoration.
   isLineEnding(x, y) {
     var c = at(y, x);
-    return c === "*" || c === "<" || c === ">" || c === "^" || c === "v";
+    return c == "*" || c == "<" || c == ">" || c == "^" || c == "v";
   }
 
   // Finds a character that belongs to unextracted line.
   findLineChar() {
     for (var y = 0; y < height; y++) {
       for (var x = 0; x < width; x++) {
-        if (data[y][x] === '|' || data[y][x] === '-') {
+        if (data[y][x] == '|' || data[y][x] == '-') {
           return new Point(x, y);
         }
       }
@@ -321,8 +321,8 @@ parseASCIIArt(string) {
 
   // Erase the given extracted line.
   erase(line) {
-    var dx = line.x0 !== line.x1 ? 1 : 0;
-    var dy = line.y0 !== line.y1 ? 1 : 0;
+    var dx = line.x0 != line.x1 ? 1 : 0;
+    var dy = line.y0 != line.y1 ? 1 : 0;
 
     if (dx != 0 || dy != 0) {
       var x = line.x0 + dx, y = line.y0 + dy;
@@ -340,7 +340,7 @@ parseASCIIArt(string) {
   }
 
   var figures = [];  // List of extracted figures.
-  
+
   // Extract a single line and erase it from the ascii art matrix.
   extractLine() {
     var ch = findLineChar();
@@ -363,10 +363,10 @@ parseASCIIArt(string) {
       // Line has a decorated start. Extract is as well.
       x0 -= d.x;
       y0 -= d.y;
-      start = (data[y0][x0] === "*") ? "circle" : "arrow";
+      start = (data[y0][x0] == "*") ? "circle" : "arrow";
     }
 
-    // Find line's end by advancing forward in the given direction. 
+    // Find line's end by advancing forward in the given direction.
     var x1 = ch.x;
     var y1 = ch.y;
     while (isPartOfLine(x1 + d.x, y1 + d.y)) {
@@ -382,7 +382,7 @@ parseASCIIArt(string) {
       // Line has a decorated end. Extract it.
       x1 += d.x;
       y1 += d.y;
-      end = (data[y1][x1] === "*") ? "circle" : "arrow";
+      end = (data[y1][x1] == "*") ? "circle" : "arrow";
     }
 
     // Create line object and erase line from the ascii art matrix.
@@ -394,12 +394,12 @@ parseASCIIArt(string) {
     // Those should not intersect with their targets but should touch them
     // instead. Should be done after erasure to ensure that erase deletes
     // arrowheads.
-    if (start === "arrow") {
+    if (start == "arrow") {
       line.x0 -= d.x;
       line.y0 -= d.y;
     }
 
-    if (end === "arrow") {
+    if (end == "arrow") {
       line.x1 += d.x;
       line.y1 += d.y;
     }
@@ -408,26 +408,26 @@ parseASCIIArt(string) {
   }
 
   // Extract all non space characters that were left after line extraction
-  // as text objects. 
+  // as text objects.
   extractText() {
     for (var y = 0; y < height; y++) {
       for (var x = 0; x < width; x++) {
-        if (data[y][x] !== ' ') {
+        if (data[y][x] != ' ') {
           // Find the end of the text annotation by searching for a space.
           var start = x, end = x;
-          while ((end < width) && (data[y][end] !== " ")) end++;
+          while ((end < width) && (data[y][end] != " ")) end++;
 
-          var text = Strings.join(data[y].getRange(start, end - start), '');
+          var text = data[y].getRange(start, end).join('');
 
           // Check if it can be concatenated with a previously found text annotation.
           var prev = figures[figures.length - 1];
-          if ((prev is Text) && (prev.x0 + prev.text.length + 1) === start) {
+          if ((prev is Text) && (prev.x0 + prev.text.length + 1) == start) {
             // If they touch concatentate them.
             prev.text = "${prev.text} $text";
           } else {
             // Look for a grey color modifiers.
             var color = "black";
-            if (text[0] === "\\" && text[text.length - 1] === "\\") {
+            if (text[0] == "\\" && text[text.length - 1] == "\\") {
               text = text.substring(1, text.length - 1);
               color = "#666";
             }
@@ -459,21 +459,21 @@ drawDiagram() {
       height = math.max(height, Y(figure.y1 + 1));
     }
   }
-  
+
   var canvas = html.query("#canvas");
 
   canvas.width = width.toInt();
   canvas.height = height.toInt();
-  
+
   var ctx = new ShakyCanvas(canvas);
   for (var figure in figures) figure.draw(ctx);
 }
 
 void main() {
-  html.query("#textarea").on.change.add((e) => drawDiagram());
-  html.query("#textarea").on.keyUp.add((e) => drawDiagram());
-  
-  html.query("#save").on.click.add((e) {
+  html.query("#textarea").onChange.listen((e) => drawDiagram());
+  html.query("#textarea").onKeyUp.listen((e) => drawDiagram());
+
+  html.query("#save").onClick.listen((e) {
     var a = new html.AnchorElement()
                ..href = html.query("#canvas").toDataURL("image/png")
                ..attributes['download'] = html.query("#name").value;
@@ -490,7 +490,7 @@ void main() {
     try {
       if (js.context.window.FONTS_ACTIVE) return;
     } catch (e) { }
-    js.context.drawDiagram = new js.Callback.once((x) => drawDiagram);
+    js.context.drawDiagram = new js.Callback.once(drawDiagram);
   });
 
   drawDiagram();

@@ -8,7 +8,9 @@
         google: { families: [ 'Gloria Hallelujah' ] },
         active: function () {
           FONTS_ACTIVE = true;
-          if (typeof drawDiagram === 'function') drawDiagram();
+          if (typeof drawDiagram === 'function') {
+            drawDiagram();
+          }
         }
       };
       (function() {
@@ -73,8 +75,9 @@
              +--------------------+
     </textarea>
     <canvas id="canvas" width="640" height="480"/>
-    
-    <script type="application/dart" src="web/shaky.dart"></script>
-    <script src="https://dart.googlecode.com/svn/branches/bleeding_edge/dart/client/dart.js"></script>
+
+    <script type="application/dart" src="shaky.dart"></script>
+    <script type="text/javascript" src="packages/browser/interop.js"></script>
+    <script type="text/javascript" src="packages/browser/dart.js"></script>
   </body>
 </html>

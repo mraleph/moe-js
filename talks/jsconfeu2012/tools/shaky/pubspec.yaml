@@ -1,5 +1,5 @@
-name:  shaky
-description:  Shaky Diagramming
+name: shaky
+description: Shaky Diagramming
 dependencies:
+  browser: any
   js: any
-#  unittest: { sdk: unittest }
