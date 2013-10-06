@@ -5182,7 +5182,7 @@ var BYTECODE = null;
     .click(function () {
       TraceID = 0;
       $('#moe-traces').html('');
-      var score = BENCHMARK_POINTS() + 40;
+      var score = BENCHMARK_POINTS();
       var scoreBaseline = BENCHMARK_POINTS_BASELINE();
       $('#moe-score').text(score + ' vs ' + scoreBaseline + ' ms.');
     })
