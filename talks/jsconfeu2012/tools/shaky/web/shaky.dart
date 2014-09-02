@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:async' as async;
 import 'dart:html' as html;
 import 'dart:math' as math;
 import 'package:js/js.dart' as js;
@@ -448,7 +449,7 @@ parseASCIIArt(string) {
 
 // Draw a diagram from the ascii art contained in the #textarea.
 drawDiagram() {
-  var figures = parseASCIIArt(html.query("#textarea").value);
+  var figures = parseASCIIArt(html.querySelector("#textarea").value);
 
   // Compute required canvas size.
   var width = 0;
@@ -460,7 +461,7 @@ drawDiagram() {
     }
   }
 
-  var canvas = html.query("#canvas");
+  var canvas = html.querySelector("#canvas");
 
   canvas.width = width.toInt();
   canvas.height = height.toInt();
@@ -470,15 +471,15 @@ drawDiagram() {
 }
 
 void main() {
-  html.query("#textarea").onChange.listen((e) => drawDiagram());
-  html.query("#textarea").onKeyUp.listen((e) => drawDiagram());
+  html.querySelector("#textarea").onChange.listen((e) => drawDiagram());
+  html.querySelector("#textarea").onKeyUp.listen((e) => drawDiagram());
 
-  html.query("#save").onClick.listen((e) {
+  html.querySelector("#save").onClick.listen((e) {
     var a = new html.AnchorElement()
-               ..href = html.query("#canvas").toDataURL("image/png")
-               ..attributes['download'] = html.query("#name").value;
+               ..href = html.querySelector("#canvas").toDataUrl("image/png")
+               ..attributes['download'] = html.querySelector("#name").value;
     html.document.body.nodes.add(a);
-    html.window.setTimeout(() => a.remove(), 1000);
+    new async.Timer(const Duration(seconds: 1), () => a.remove());
     try {
       a.click();
     } catch (e) {
@@ -486,12 +487,10 @@ void main() {
     }
   });
 
-  js.scoped(() {
-    try {
-      if (js.context.window.FONTS_ACTIVE) return;
-    } catch (e) { }
-    js.context.drawDiagram = new js.Callback.once(drawDiagram);
-  });
+  try {
+    if (js.context.window.FONTS_ACTIVE) return;
+  } catch (e) { }
+  js.context.drawDiagram = new js.FunctionProxy(drawDiagram);
 
   drawDiagram();
 }

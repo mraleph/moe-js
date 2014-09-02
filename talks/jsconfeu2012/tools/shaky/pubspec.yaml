@@ -2,4 +2,4 @@ name: shaky
 description: Shaky Diagramming
 dependencies:
   browser: any
-  js: any
+  js: 0.2.2

@@ -4,12 +4,8 @@ packages:
   browser:
     description: browser
     source: hosted
-    version: "0.6.21+3"
+    version: "0.10.0+2"
   js:
     description: js
     source: hosted
-    version: "0.0.24"
-  meta:
-    description: meta
-    source: hosted
-    version: "0.6.21+3"
+    version: "0.2.2"
