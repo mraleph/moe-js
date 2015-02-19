@@ -163,6 +163,8 @@ class Point {
   final x;
   final y;
   const Point(this.x, this.y);
+  
+  toString() => "(${x}, ${y})";
 }
 
 
@@ -172,6 +174,8 @@ class Line {
   Line(this.x0, this.y0, this.start, this.x1, this.y1, this.end, this.color);
 
   var x0, y0, start, x1, y1, end, color;
+  
+  toString() => "(${x0}, ${y0}) - (${x1}, ${y1})";
 
   draw(ctx) {
     ctx.strokeStyle = color;
@@ -195,6 +199,75 @@ class Line {
         canvas.arrowhead(x0, y0, x1, y1);
         break;
     }
+  }
+}
+
+class Bracket {
+  var line1, p, line2;
+  Bracket(this.line1, this.p, this.line2);
+  
+  draw(ctx) {
+    line1.draw(ctx);
+    ctx.beginPath();
+    ctx.moveTo(X(line1.x1), Y(line1.y1));
+    ctx.lineTo(X(line2.x0 + 1), (Y(line1.y1) + Y(line2.y0)) / 2);     
+    ctx.lineTo(X(line2.x0), Y(line2.y0));
+    ctx.stroke();
+    line2.draw(ctx);
+  }
+}
+
+class Split {
+  final Point start, end;
+  
+  Split(this.start, this.end);
+  
+  draw(ctx) {
+    final dy = (Y(start.y + 1) - Y(start.y)) / 3;
+
+    ctx.beginPath();
+    ctx.moveTo(X(start.x), Y(start.y - 1)); 
+    ctx.lineTo(X(start.x), Y(start.y) - dy);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.ctx.moveTo(X(start.x), Y(start.y) - dy);
+    var sign = -1;
+    for (var x = start.x + 1; x <= end.x; x++) {
+      var x3, y3, x4, y4;
+      x3 = x4 = (X(x - 1) + X(x)) / 2 + (ctx.random.nextDouble() * 6 - 3);
+      y3 = y4 = Y(start.y) + (-dy + sign * dy) + (ctx.random.nextDouble() * 2 - 1);
+      sign = -sign;
+      ctx.ctx.bezierCurveTo(x3, y3, x4, y4, X(x), Y(start.y) - dy);
+    }
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(X(end.x), Y(start.y - 1)); 
+    ctx.lineTo(X(end.x), Y(start.y) - dy);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(X(start.x), Y(start.y + 1)); 
+    ctx.lineTo(X(start.x), Y(start.y) + dy);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    sign = -1;
+    ctx.ctx.moveTo(X(start.x), Y(start.y) + dy);
+    for (var x = start.x + 1; x <= end.x; x++) {
+      var x3, y3, x4, y4;
+      x3 = x4 = (X(x - 1) + X(x)) / 2 + (ctx.random.nextDouble() * 6 - 3);
+      y3 = y4 = Y(start.y) + (dy + sign * dy) + (ctx.random.nextDouble() * 2 - 1);
+      sign = -sign;
+      ctx.ctx.bezierCurveTo(x3, y3, x4, y4, X(x), Y(start.y) + dy);
+    }
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(X(end.x), Y(start.y + 1)); 
+    ctx.lineTo(X(end.x), Y(start.y) + dy);
+    ctx.stroke();
   }
 }
 
@@ -241,7 +314,7 @@ parseASCIIArt(string) {
   // Returns true iff the character can be part of the line.
   isPartOfLine(x, y) {
     var c = at(y, x);
-    return c == "|" || c == "-" || c == "+" || c == "~" || c == "!";
+    return c == "|" || c == "-" || c == "+" || c == "!";
   }
 
   // If character represents a color modifier returns CSS color.
@@ -268,6 +341,29 @@ parseASCIIArt(string) {
     }
   }
 
+  findChar(ch) {
+    for (var y = 0; y < height; y++) {
+      for (var x = 0; x < width; x++) {
+        if (data[y][x] == '~') {
+          return new Point(x, y);
+        }
+      }
+    }
+  }
+  
+  findPoints(ch) {
+    final points = [];
+    for (var y = 0; y < height; y++) {
+      for (var x = 0; x < width; x++) {
+        if (data[y][x] == ch) {
+          points.add(new Point(x, y));
+        }
+      }
+    }
+    return points;
+  }
+
+  
   // Converts line's character to the direction of line's growth.
   var dir = { "-": const Point(1, 0), "|": const Point(0, 1)};
 
@@ -297,7 +393,6 @@ parseASCIIArt(string) {
             data[y][x] = "|";
             return;
           case "-":
-          case "~":
           case "+":
             data[y][x] = "-";
             return;
@@ -310,7 +405,6 @@ parseASCIIArt(string) {
             data[y][x] = "|";
             return;
           case "-":
-          case "~":
           case "+":
             data[y][x] = "-";
             return;
@@ -407,6 +501,38 @@ parseASCIIArt(string) {
     return true;
   }
 
+  extractSplit() {
+    var ch = findChar("~");
+    if (ch == null) return false;
+    
+    data[ch.y][ch.x] = ' ';
+
+    var d = const Point(1, 0);
+
+    // Find line's start by advancing in the oposite direction.
+    var x0 = ch.x;
+    var y0 = ch.y;
+    while (at(y0 - d.y, x0 - d.x) == '~') {
+      data[y0 - d.y][x0 - d.x] = ' ';
+      x0 -= d.x;
+      y0 -= d.y;
+    }
+
+    // Find line's end by advancing forward in the given direction.
+    var x1 = ch.x;
+    var y1 = ch.y;
+    while (at(y1 + d.y, x1 + d.x) == '~') {
+      data[y1 + d.y][x1 + d.x] = ' ';
+      x1 += d.x;
+      y1 += d.y;
+    }
+    
+    figures.add(new Split(new Point(x0, y0), new Point(x1, y1)));
+    if (figures.length > 1000) throw "";
+    return true;
+  }
+
+  
   // Extract all non space characters that were left after line extraction
   // as text objects.
   extractText() {
@@ -427,7 +553,9 @@ parseASCIIArt(string) {
           } else {
             // Look for a grey color modifiers.
             var color = "black";
-            if (text[0] == "\\" && text[text.length - 1] == "\\") {
+            if (text.length > 2 &&
+                text[0] == "\\" && 
+                text[text.length - 1] == "\\") {
               text = text.substring(1, text.length - 1);
               color = "#666";
             }
@@ -438,8 +566,23 @@ parseASCIIArt(string) {
       }
     }
   }
+  
+  while (extractSplit());
 
   while (extractLine());  // Extract all lines.
+
+  for (var p in findPoints(">")) {
+    final line1 = figures.firstWhere((l) => l is Line && l.x0 == l.x1 && (l.x0 + 1) == p.x && (l.y1 + 1  == p.y), orElse: () => null);
+    final line2 = figures.firstWhere((l) => l is Line && l.x0 == l.x1 && (l.x0 + 1) == p.x && (l.y0 - 1  == p.y), orElse: () => null);
+
+    if (line1 != null && line2 != null) {
+      figures.add(new Bracket(line1, p, line2));
+      figures.remove(line1);
+      figures.remove(line2);
+      eraseChar(p.x, p.y, 0, 0);   
+    }
+  }
+  
   extractText();  // Extract all text.
 
   return figures;
@@ -447,8 +590,19 @@ parseASCIIArt(string) {
 
 
 // Draw a diagram from the ascii art contained in the #textarea.
-drawDiagram() {
-  var figures = parseASCIIArt(html.query("#textarea").value);
+drawDiagram(html.PreElement el) {
+  var figures = parseASCIIArt(el.text);
+  
+  el.style.display = 'none';
+  
+  var canvas = el.nextNode;
+  if (canvas is! html.CanvasElement) {
+    canvas = new html.CanvasElement()
+      ..style.display = 'block';
+    el.parentNode.insertBefore(canvas, el.nextNode);
+  }
+
+  var ctx = new ShakyCanvas(canvas);
 
   // Compute required canvas size.
   var width = 0;
@@ -457,42 +611,37 @@ drawDiagram() {
     if (figure is Line) {
       width = math.max(width, X(figure.x1 + 1));
       height = math.max(height, Y(figure.y1 + 1));
+    } else if (figure is Text) {
+      final metrics = ctx.ctx.measureText(figure.text);
+      width = math.max(width, X(figure.x0) + metrics.width.toInt());
+      height = math.max(height, Y(figure.y0 + 1));
     }
   }
-
-  var canvas = html.query("#canvas");
 
   canvas.width = width.toInt();
   canvas.height = height.toInt();
 
-  var ctx = new ShakyCanvas(canvas);
+  ctx = new ShakyCanvas(canvas);
+
   for (var figure in figures) figure.draw(ctx);
 }
 
+refresh() {
+  html.document.querySelectorAll("pre.shaky").forEach(drawDiagram);
+}
+
 void main() {
-  html.query("#textarea").onChange.listen((e) => drawDiagram());
-  html.query("#textarea").onKeyUp.listen((e) => drawDiagram());
-
-  html.query("#save").onClick.listen((e) {
-    var a = new html.AnchorElement()
-               ..href = html.query("#canvas").toDataURL("image/png")
-               ..attributes['download'] = html.query("#name").value;
-    html.document.body.nodes.add(a);
-    html.window.setTimeout(() => a.remove(), 1000);
-    try {
-      a.click();
-    } catch (e) {
-      a.$dom_dispatchEvent(new html.Event("click"));
-    }
+  js.context.WebFontConfig = js.map({
+    "google": { "families": [ 'Gloria Hallelujah' ] },
+    "active": refresh
   });
 
-  js.scoped(() {
-    try {
-      if (js.context.window.FONTS_ACTIVE) return;
-    } catch (e) { }
-    js.context.drawDiagram = new js.Callback.once(drawDiagram);
-  });
-
-  drawDiagram();
+  var wf =
+    new html.ScriptElement()
+      ..src = '//ajax.googleapis.com/ajax/libs/webfont/1/webfont.js'
+      ..type = 'text/javascript'
+      ..async = true;
+  var s = html.document.getElementsByTagName('script')[0];
+  s.parentNode.insertBefore(wf, s);
 }
 
